@@ -14,11 +14,11 @@ def main(args):
     - selecting the necessary models and views for the current task
     - passing data between models and views
     """
-    InFiles = args.infiles
-    if not isinstance(InFiles, list):
-        InFiles = [args.infiles]
+    in_files = args.infiles
+    if not isinstance(in_files, list):
+        in_files = [args.infiles]
 
-    for filename in InFiles:
+    for filename in in_files:
         measurement_data = models.read_variable_from_csv(filename)
 
         view_data = {
@@ -40,6 +40,6 @@ if __name__ == "__main__":
         nargs='+',
         help='Input CSV(s) containing measurement data')
 
-    args = parser.parse_args()
+    in_args = parser.parse_args()
 
-    main(args)
+    main(in_args)
