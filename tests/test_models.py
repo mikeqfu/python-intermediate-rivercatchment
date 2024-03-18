@@ -1,8 +1,10 @@
 """Tests for statistics functions within the Model layer."""
 
+import datetime
+
 import pandas as pd
 import pandas.testing as pdt
-import datetime
+import pytest
 
 
 def test_daily_mean_zeros():
@@ -49,3 +51,7 @@ def test_daily_mean_integers():
 
     # Need to use Pandas testing functions to compare arrays
     pdt.assert_frame_equal(daily_mean(test_input), test_result)
+
+
+if __name__ == '__main__':
+    pytest.main()
