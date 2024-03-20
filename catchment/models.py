@@ -13,17 +13,18 @@ import numpy as np
 import pandas as pd
 
 
-def read_variable_from_csv(filename):
+def read_variable_from_csv(filename, measurement):
     """Reads a named variable from a CSV file, and returns a
     pandas dataframe containing that variable. The CSV file must contain
     a column of dates, a column of site ID's, and (one or more) columns
     of data - only one of which will be read.
 
     :param filename: Filename of CSV to load
+    :param measurement: Measurement
     :return: 2D array of given variable. Index will be dates,
              Columns will be the individual sites
     """
-    dataset = pd.read_csv(filename, usecols=['Date', 'Site', 'Rainfall (mm)'])
+    dataset = pd.read_csv(filename, usecols=['Date', 'Site', measurement])
 
     dataset = dataset.rename({'Date': 'OldDate'}, axis='columns')
     dataset['Date'] = [pd.to_datetime(x, dayfirst=True) for x in dataset['OldDate']]
@@ -32,7 +33,7 @@ def read_variable_from_csv(filename):
     newdataset = pd.DataFrame(index=dataset['Date'].unique())
 
     for site in dataset['Site'].unique():
-        newdataset[site] = dataset[dataset['Site'] == site].set_index('Date')["Rainfall (mm)"]
+        newdataset[site] = dataset[dataset['Site'] == site].set_index('Date')[measurement]
 
     newdataset = newdataset.sort_index()
 
@@ -155,6 +156,7 @@ class MeasurementSeries:
 
 class Location:
     """A Location."""
+
     def __init__(self, name):
         self.name = name
 
@@ -169,20 +171,18 @@ class Site(Location):
         super().__init__(name)
         self.measurements = {}
 
+    def add_measurement(self, measurement_id, data, units=None):
+        if measurement_id in self.measurements.keys():
+            self.measurements[measurement_id].add_measurement(data)
 
-def add_measurement(self, measurement_id, data, units=None):
-    if measurement_id in self.measurements.keys():
-        self.measurements[measurement_id].add_measurement(data)
+        else:
+            self.measurements[measurement_id] = MeasurementSeries(data, measurement_id, units)
 
-    else:
-        self.measurements[measurement_id] = MeasurementSeries(data, measurement_id, units)
-
-
-@property
-def last_measurements(self):
-    return pd.concat(
-        [self.measurements[key].series[-1:] for key in self.measurements.keys()],
-        axis=1).sort_index()
+    @property
+    def last_measurements(self):
+        return pd.concat(
+            [self.measurements[key].series[-1:] for key in self.measurements.keys()],
+            axis=1).sort_index()
 
 
 class Catchment(Location):

@@ -22,3 +22,10 @@ def visualize(data_dict):
     fig.tight_layout()
 
     plt.show()
+
+
+def display_measurement_record(site):
+    """Display each dataset for a single site."""
+    print(site.name)
+    for measurement in site.measurements:
+        print(site.measurements[measurement].series)
