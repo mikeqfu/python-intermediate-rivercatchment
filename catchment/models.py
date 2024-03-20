@@ -7,6 +7,8 @@ data for a single measurement site, and each row represents a single measurement
 time across all sites.
 """
 
+import functools
+
 import numpy as np
 import pandas as pd
 
@@ -105,3 +107,96 @@ def data_normalise(data):
     normalised[np.isnan(normalised)] = 0
 
     return normalised
+
+
+def daily_above_threshold(site_id, data, threshold):
+    """Determine whether each data value exceeds a given threshold for a given site.
+
+    :param site_id: The identifier for the site column
+    :param data: A 2D Pandas data frame with measurement data. Columns are measurement sites.
+    :param threshold: A threshold value to check against
+    :returns: A boolean list representing whether each data point for a given site exceeded
+        the threshold
+    """
+
+    return list(map(lambda x: x > threshold, data[site_id]))
+
+
+def data_above_threshold(site_id, data, threshold):
+    """Count how many data points for a given site exceed a given threshold.
+
+    :param site_id: The identifier for the site column
+    :param data: A 2D Pandas data frame with measurement data. Columns are measurement sites.
+    :param threshold: A threshold value to check against
+    :returns: An integer representing the number of data points over a given threshold
+   """
+
+    above_threshold = map(lambda x: x > threshold, data[site_id])
+    return functools.reduce(lambda a, b: a + 1 if b else a, above_threshold, 0)
+
+
+class MeasurementSeries:
+    def __init__(self, series, name, units):
+        self.series = series
+        self.name = name
+        self.units = units
+        self.series.name = self.name
+
+    def add_measurement(self, data):
+        self.series = pd.concat([self.series, data])
+        self.series.name = self.name
+
+    def __str__(self):
+        if self.units:
+            return f"{self.name} ({self.units})"
+        else:
+            return self.name
+
+
+class Location:
+    """A Location."""
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        return self.name
+
+
+class Site(Location):
+    """A measurement site in the study."""
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.measurements = {}
+
+
+def add_measurement(self, measurement_id, data, units=None):
+    if measurement_id in self.measurements.keys():
+        self.measurements[measurement_id].add_measurement(data)
+
+    else:
+        self.measurements[measurement_id] = MeasurementSeries(data, measurement_id, units)
+
+
+@property
+def last_measurements(self):
+    return pd.concat(
+        [self.measurements[key].series[-1:] for key in self.measurements.keys()],
+        axis=1).sort_index()
+
+
+class Catchment(Location):
+    """A catchment area in the study."""
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.sites = {}
+
+    def add_site(self, new_site):
+        # Basic check to see if the site has already been added to the catchment area
+        for site in self.sites:
+            if site == new_site:
+                print(f'{new_site} has already been added to site list')
+                return
+
+        self.sites[new_site.name] = Site(new_site)
