@@ -76,6 +76,6 @@ def parse_cli_arguments():
 
 
 if __name__ == "__main__":
-    args = parse_cli_arguments()
+    args_ = parse_cli_arguments()
 
-    main(args)
+    main(args_)
