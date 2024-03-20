@@ -43,4 +43,4 @@ jobs:
 
     - name: Check style with Pylint
       run: |
-        python3 -m pylint --fail-under=0 --reports=y catchment
+        python3 -m pylint --reports=y catchment
