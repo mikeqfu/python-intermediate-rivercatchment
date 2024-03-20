@@ -5,6 +5,8 @@ import datetime
 import pandas as pd
 import pandas.testing as pdt
 import pytest
+import numpy.testing as npt
+import numpy as np
 
 
 def test_daily_mean_zeros():
@@ -163,6 +165,73 @@ def test_daily_min_python_list():
 
     with pytest.raises(AttributeError):
         _ = daily_min([[3, 4, 7], [-3, 0, 5]])
+
+
+@pytest.mark.parametrize(
+    "test_data, test_index, test_columns, expected_data, expected_index, expected_columns",
+    [
+        (
+                [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+                [pd.to_datetime('2000-01-01 01:00'),
+                 pd.to_datetime('2000-01-01 02:00'),
+                 pd.to_datetime('2000-01-01 03:00')],
+                ['A', 'B', 'C'],
+                [[0.14, 0.25, 0.33], [0.57, 0.63, 0.66], [1.0, 1.0, 1.0]],
+                [pd.to_datetime('2000-01-01 01:00'),
+                 pd.to_datetime('2000-01-01 02:00'),
+                 pd.to_datetime('2000-01-01 03:00')],
+                ['A', 'B', 'C']
+        ),
+    ])
+def test_normalise(test_data, test_index, test_columns, expected_data, expected_index,
+                   expected_columns):
+    """Test normalisation works for arrays of one and positive integers.
+       Assumption that test accuracy of two decimal places is sufficient."""
+    from catchment.models import data_normalise
+
+    a = data_normalise(pd.DataFrame(data=test_data, index=test_index, columns=test_columns))
+    b = pd.DataFrame(data=expected_data, index=expected_index, columns=expected_columns)
+    pdt.assert_frame_equal(a, b, atol=1e-2)
+
+
+@pytest.mark.parametrize(
+    "test, expected, expect_raises",
+    [
+        # previous test cases here, with None for expect_raises, except for the next one -
+        #   add ValueError as an expected exception (since it has a negative input value)
+        (
+                [[-1, 2, 3], [4, 5, 6], [7, 8, 9]],
+                [[0, 0.67, 1], [0.67, 0.83, 1], [0.78, 0.89, 1]],
+                ValueError,
+        ),
+        (
+                [[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+                [[0.14, 0.25, 0.33], [0.57, 0.63, 0.67], [1.0, 1.0, 1.0]],
+                None,
+        ),
+        (
+                'hello',
+                None,
+                TypeError,
+        ),
+        (
+                3,
+                None,
+                TypeError,
+        ),
+    ])
+def test_data_normalise(test, expected, expect_raises):
+    """Test normalisation works for arrays of one and positive integers."""
+    from catchment.models import data_normalise
+
+    if isinstance(test, list):
+        test = np.array(test)
+
+    if expect_raises is not None:
+        with pytest.raises(expect_raises):
+            npt.assert_almost_equal(data_normalise(test), np.array(expected), decimal=2)
+    else:
+        npt.assert_almost_equal(data_normalise(test), np.array(expected), decimal=2)
 
 
 if __name__ == '__main__':
