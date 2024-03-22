@@ -2,11 +2,11 @@
 
 import datetime
 
+import numpy as np
+import numpy.testing as npt
 import pandas as pd
 import pandas.testing as pdt
 import pytest
-import numpy.testing as npt
-import numpy as np
 
 
 def test_daily_mean_zeros():
@@ -104,6 +104,7 @@ def test_daily_mean_integers():
 def test_daily_max(test_input, expected_output):
     """Test max function works for array of zeroes and positive integers."""
     from catchment.models import daily_max
+
     pdt.assert_frame_equal(daily_max(test_input), expected_output)
 
 
@@ -156,6 +157,7 @@ def test_daily_max(test_input, expected_output):
 def test_daily_min(test_input, expected_output):
     """Test min function works for array of zeroes and positive integers."""
     from catchment.models import daily_min
+
     pdt.assert_frame_equal(daily_min(test_input), expected_output)
 
 
@@ -237,6 +239,7 @@ def test_data_normalise(test, expected, expect_raises):
 def test_create_site():
     """Check a site is created correctly given a name."""
     from catchment.models import Site
+
     name = 'PL23'
     p = Site(name=name)
     assert p.name == name
@@ -245,6 +248,7 @@ def test_create_site():
 def test_create_catchment():
     """Check a catchment is created correctly given a name."""
     from catchment.models import Catchment
+
     name = 'Spain'
     catchment = Catchment(name=name)
     assert catchment.name == name
@@ -253,6 +257,7 @@ def test_create_catchment():
 def test_catchment_is_location():
     """Check if a catchment is a location."""
     from catchment.models import Catchment, Location
+
     catchment = Catchment("Spain")
     assert isinstance(catchment, Location)
 
@@ -260,6 +265,7 @@ def test_catchment_is_location():
 def test_site_is_location():
     """Check if a site is a location."""
     from catchment.models import Site, Location
+
     PL23 = Site("PL23")
     assert isinstance(PL23, Location)
 
@@ -267,6 +273,7 @@ def test_site_is_location():
 def test_sites_added_correctly():
     """Check sites are being added correctly by a catchment. """
     from catchment.models import Catchment, Site
+
     catchment = Catchment("Spain")
     PL23 = Site("PL23")
     catchment.add_site(PL23)
@@ -277,6 +284,7 @@ def test_sites_added_correctly():
 def test_no_duplicate_sites():
     """Check adding the same site to the same catchment twice does not result in duplicates. """
     from catchment.models import Catchment, Site
+
     catchment = Catchment("Sheila Wheels")
     PL23 = Site("PL23")
     catchment.add_site(PL23)
